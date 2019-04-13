@@ -1,11 +1,13 @@
 ProgressBar   = require 'progress'
 Promise       = require 'bluebird'
 _             = require 'lodash'
+_cliProgress  = require 'cli-progress'
 colors        = require 'colors'
 fs            = require 'fs'
 humanize      = require 'humanize'
 mime          = require 'mime-types'
 path          = require 'path'
+prompts       = require 'prompts'
 { promisify } = require 'util'
 
 statAsync  = promisify(fs.stat)
@@ -21,8 +23,11 @@ module.exports = ->
       console.log "#{idx + 1}/#{total}) Uploading .. #{fromFile}"
       parentId = await self.createDirs path.dirname toDrive
       
-      bar = new ProgressBar("[:percent] #{toDrive}", { total: fileSize })
-      
+      #bar = new ProgressBar("[:percent] #{toDrive}", { total: fileSize })
+      bar = new _cliProgress.Bar({
+        format: '  [{bar}] {percentage}%'
+      }, _cliProgress.Presets.react)
+      bar.start fileSize, 0
       { data } = await drive.files.create {
         requestBody: {
           name: path.basename(toDrive)
@@ -36,10 +41,9 @@ module.exports = ->
       }, {
         maxRedirects: 0
         onUploadProgress: (evt) ->
-          #console.log evt.bytesRead
-          bar.tick evt.bytesRead if bar
+          bar.update evt.bytesRead
       }
-
+      bar.stop()
       await self.deleteDupFiles parentId, { drivePath: toDrive, fileId: data.id }
       console.log colors.bold.green("Done. ") + data.id
       _.extend {}, { fromFile, fileSize, toDrive }, { id: data.id }
@@ -128,13 +132,26 @@ module.exports = ->
         
       width = _.max files.map (e) -> "#{e}".length
       fileSizeWidth = _.max values.map ({ fileSizeH }) -> fileSizeH.length
+      console.log ''
       values.map ({ fromFile, fileSizeH, toDrive }) ->
         size  = _.padStart fileSizeH, fileSizeWidth, ' '
         fromF = _.padEnd fromFile, width, ' '
         to    = colors.bold '=>'
         console.log "[#{size}] #{fromF} #{to} #{toDrive}"
 
+      return Promise.resolve() if values.length <= 0
+
+      console.log ''
+      { ok } = await prompts {
+        type: 'confirm'
+        name: 'ok'
+        message: 'Do you want to upload these files?'
+        initial: false
+      }
+
+      return Promise.resolve() unless ok
       Promise.mapSeries values, self.uploadFile
+      
       
     calMd5Hash: (filepath) ->
       new Promise (resolve, reject) ->

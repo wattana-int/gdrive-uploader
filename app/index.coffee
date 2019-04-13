@@ -1,3 +1,4 @@
+#!/usr/bin/env coffee
 colors  = require 'colors'
 path    = require 'path'
 program = require 'commander'

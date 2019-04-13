@@ -4,5 +4,8 @@ services:
     volumes: 
       - app_node_module:/app/node_modules
       - ../app:/app
+      - /Users/wattana/Downloads:/downloads:ro
+      - data:/data
 volumes: 
   app_node_module: {}
+  data: {}
