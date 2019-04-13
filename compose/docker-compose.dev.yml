@@ -1,0 +1,8 @@
+version: "3"
+services:
+  app:
+    volumes: 
+      - app_node_module:/app/node_modules
+      - ../app:/app
+volumes: 
+  app_node_module: {}

@@ -1,0 +1,25 @@
+{
+  "name": "gdrive-uploader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.4",
+    "coffeescript": "^2.4.1",
+    "colors": "^1.3.3",
+    "commander": "^2.20.0",
+    "fs-extra": "^7.0.1",
+    "googleapis": "^39.2.0",
+    "humanize": "0.0.9",
+    "inquirer": "^6.2.2",
+    "js-yaml": "^3.13.1",
+    "lodash": "^4.17.11",
+    "progress": "^2.0.3",
+    "prompts": "^2.0.4"
+  }
+}
