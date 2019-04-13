@@ -108,7 +108,7 @@ module.exports = ->
       "#{path.sep}#{common.join path.sep}"
       
     upload: (files, { driveDir, confirm }) ->
-      cdir = self.commondir(files)
+      cdir = self.commondir files
       values = await Promise.mapSeries files, (filePath) ->
         newPath = filePath
         if _.isString(driveDir)
@@ -132,7 +132,8 @@ module.exports = ->
         
       width = _.max files.map (e) -> "#{e}".length
       fileSizeWidth = _.max values.map ({ fileSizeH }) -> fileSizeH.length
-      console.log ''
+
+      console.log '' if values.length > 0
       values.map ({ fromFile, fileSizeH, toDrive }) ->
         size  = _.padStart fileSizeH, fileSizeWidth, ' '
         fromF = _.padEnd fromFile, width, ' '

@@ -37,7 +37,8 @@ program
   .option '-y, --confirm', 'Confirm'
   .action (fileGlob, cmd) ->
     files = await fg fileGlob
+    files.map (e) -> path.resolve e
     { upload } = await require('./libs/file')()
-    await upload files, cmd
+    await upload files.map((e) -> path.resolve e), cmd
     
 program.parse process.argv
