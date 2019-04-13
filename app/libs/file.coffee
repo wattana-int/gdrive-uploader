@@ -16,13 +16,14 @@ GOOGLE_MIME_FILE    = 'application/vnd.google-apps.file'
 module.exports = ->
   { drive } = await require('./auth')()
   self = {
-    uploadFile: ({ fromFile, fileSize, toDrive }) ->
-      console.log "Uploading .. #{fromFile}"
+    uploadFile: ({ fromFile, fileSize, toDrive }, idx, total) ->
+      console.log ""
+      console.log "#{idx + 1}/#{total}) Uploading .. #{fromFile}"
       parentId = await self.createDirs path.dirname toDrive
       
-      bar = new ProgressBar("  [:percent] #{toDrive}", { total: fileSize })
+      bar = new ProgressBar("[:percent] #{toDrive}", { total: fileSize })
       
-      res = await drive.files.create {
+      { data } = await drive.files.create {
         requestBody: {
           name: path.basename(toDrive)
           originalFilename: path.basename(fromFile)
@@ -39,14 +40,60 @@ module.exports = ->
           bar.tick evt.bytesRead if bar
       }
 
-      fromFile
-      
+      await self.deleteDupFiles parentId, { drivePath: toDrive, fileId: data.id }
+      console.log colors.bold.green("Done. ") + data.id
+      _.extend {}, { fromFile, fileSize, toDrive }, { id: data.id }
+    
+    deleteDupFiles: (parentId, { drivePath, fileId }) ->
+      filename = path.basename drivePath
+
+      q = [
+        "'#{parentId}' in parents"
+        "trashed = false"
+        "name = \"#{filename}\""
+      ].join ' and '
+
+      #console.log 'list file by conditions ', q
+      res = await drive.files.list { q }
+      files = _.get res, 'data.files', []
+
+      res = await Promise.map files, ({ id }) ->
+        drive.files.get {
+          fileId: id
+          fields: "id,md5Checksum"
+        }
+
+      dupfiles = _(res).map(
+        ({ data }) -> data
+      ).groupBy(
+        ({ id, md5Checksum }) -> md5Checksum
+      ).mapValues(
+        (files, md5Checksum) -> files.map ({ id }) -> id
+      ).value()
+
+      remFileIds = []
+      keepFileIds = [fileId]
+      for md5Checksum, fileIds of dupfiles
+        if fileIds.length > 1
+          if fileId in fileIds
+            remFileIds = remFileIds.concat fileIds.filter (id) -> id != fileId
+          else
+            for id, idx in fileIds
+              if idx > 0
+                remFileIds.push id
+              else
+                keepFileIds.push id
+
+      Promise.mapSeries remFileIds, (fileId) ->
+        console.log colors.red('Delete: ') + fileId
+        drive.files.delete { fileId }
+
     commondir: (files) ->
       dirs = _(files).map(
         (e) -> path.dirname(e).split(path.sep).slice(1)
       ).value()
       maxidx = _.min dirs.map (e) -> e.length
-      console.log 'max-> ', maxidx
+      
       common = []
       for idx in [0..maxidx]
         ret = dirs.map (e) -> e[idx]
@@ -54,7 +101,6 @@ module.exports = ->
         if u.length == 1 and u[0]
           common.push _(ret).uniq().value()[0]
       
-      console.log '-> ', common
       "#{path.sep}#{common.join path.sep}"
       
     upload: (files, { driveDir, confirm }) ->
@@ -88,7 +134,7 @@ module.exports = ->
         to    = colors.bold '=>'
         console.log "[#{size}] #{fromF} #{to} #{toDrive}"
 
-      await Promise.mapSeries values, self.uploadFile
+      Promise.mapSeries values, self.uploadFile
       
     calMd5Hash: (filepath) ->
       new Promise (resolve, reject) ->

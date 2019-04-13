@@ -36,12 +36,7 @@ program
   .option '-y, --confirm', 'Confirm'
   .action (fileGlob, cmd) ->
     files = await fg fileGlob
-    
-    console.log '------'
-    console.log files
-
     { upload } = await require('./libs/file')()
     await upload files, cmd
-    # await upload filePath, drivePath
     
 program.parse process.argv
