@@ -48,7 +48,6 @@ self = ->
     # if tokens.refresh_token
     #   console.log '--- refresh token! ---'
     #   console.log tokens.refresh_token
-    
 
   {
     oauth2Client,
