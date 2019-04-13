@@ -2,8 +2,16 @@ program = require 'commander'
 
 program
   .command 'auth'
-  .option '--code [code]', 'Auth code'
+  .option '-c, --code <code>', 'Auth code'
+  .option '-g, --generate-url', 'Generate login url'
   .action (cmd) ->
-    require("./libs/auth") cmd
+    { oauth2Client,
+      generateUrl,
+      setCode,
+      display } = await require('./libs/auth')()
+    
+    if cmd.generateUrl then return generateUrl()
+    if cmd.code then return await setCode(cmd.code)
+    display()
     
 program.parse process.argv

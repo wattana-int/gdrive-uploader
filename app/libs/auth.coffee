@@ -1,9 +1,12 @@
 Promise   = require 'bluebird'
 _         = require 'lodash'
 colors    = require 'colors'
-path      = require 'path'
 fsx       = require 'fs-extra'
+highlight = require('cli-highlight').highlight
 inquirer  = require 'inquirer'
+moment    = require 'moment'
+path      = require 'path'
+yaml      = require 'js-yaml'
 
 TOKEN_PATH = "/data/auth.json"
 
@@ -24,10 +27,10 @@ oauth2Client = new google.auth.OAuth2(
   redirect_uris[0]
 )
 
-self = (cmd) ->
+self = ->
   await fsx.ensureDir path.dirname TOKEN_PATH
   oauth2Client.setCredentials {
-    refresh_token: '/data/auth.json'
+    refresh_token: TOKEN_PATH
   }
 
   tokenExists = await fsx.exists TOKEN_PATH
@@ -40,27 +43,47 @@ self = (cmd) ->
     auth: oauth2Client
   }
 
-  unless _.isString cmd.code
-    console.log colors.bold.green " >> Generate Login url"
-    console.log oauth2Client.generateAuthUrl {
-      access_type: 'offline',
-      scope
-    }
-  else
-    { tokens } = await oauth2Client.getToken cmd.code
+  oauth2Client.on 'tokens', (tokens) ->
+    false
+    # if tokens.refresh_token
+    #   console.log '--- refresh token! ---'
+    #   console.log tokens.refresh_token
+    
 
-    console.log "Store access token to '#{TOKEN_PATH}'"
-    await fsx.writeJson TOKEN_PATH, tokens
+  {
+    oauth2Client,
+    drive,
+    generateUrl: ->
+      console.log colors.bold.green " >> Generate Login url"
+      console.log oauth2Client.generateAuthUrl {
+        access_type: 'offline',
+        scope
+      }
+    
+    setCode: (code) ->
+      { tokens } = await oauth2Client.getToken code
+      oauth2Client.setCredentials tokens
+      console.log "Store access token to '#{TOKEN_PATH}'"
+      await fsx.writeJson TOKEN_PATH, tokens
+    
+    display: ->
+      unless await fsx.exists TOKEN_PATH
+        return console.log 'Token file not found.'
+      
+      { expiry_date } = require TOKEN_PATH
 
-  # { email, password } = await inquirer
-  #   .prompt [{
-  #     type: 'input'
-  #     name: 'email'
-  #     massage: 'Email:'
-  #   }, {
-  #     type: 'password'
-  #     name: 'password'
-  #     massage: 'Password'
-  #   }]
-  # console.log email, password
+      ret = {
+        'File path': TOKEN_PATH
+        'Now': "#{moment()}"
+        'Expiry Date': "#{moment(expiry_date)}"
+        'Expiry': "#{moment(expiry_date).fromNow()}"
+      }
+
+      console.log colors.bold '________________________________________________________'
+      console.log 'Token file'
+      for prop, val of ret
+        console.log _.padStart("#{colors.bold prop}", 25, ' ') + ": #{val}"
+      console.log colors.bold '________________________________________________________'
+  }
+
 module.exports = self
