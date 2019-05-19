@@ -12,6 +12,9 @@ TOKEN_PATH = "/data/auth.json"
 
 { client_id, client_secret, redirect_uris } = require('../client.json').installed
 
+client_id = process.env.CLIENT_ID if _(process.env).has 'CLIENT_ID'
+client_secret = process.env.CLIENT_SECRET if _(process.env).has 'CLIENT_SECRET'
+
 { google } = require 'googleapis'
 
 scope = [

@@ -134,11 +134,12 @@ module.exports = ->
       fileSizeWidth = _.max values.map ({ fileSizeH }) -> fileSizeH.length
 
       console.log '' if values.length > 0
-      values.map ({ fromFile, fileSizeH, toDrive }) ->
-        size  = _.padStart fileSizeH, fileSizeWidth, ' '
+      values.map ({ fromFile, fileSizeH, toDrive }, idx) ->
+        size = _.padStart fileSizeH, fileSizeWidth, ' '
+        size  = colors.bold.green("[#{size}]")
         fromF = _.padEnd fromFile, width, ' '
         to    = colors.bold '=>'
-        console.log "[#{size}] #{fromF} #{to} #{toDrive}"
+        console.log "(#{idx + 1}/#{values.length}) #{size} #{fromF} #{to} #{toDrive}"
 
       return Promise.resolve() if values.length <= 0
 
