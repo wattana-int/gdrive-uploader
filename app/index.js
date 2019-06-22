@@ -53,7 +53,8 @@ program
     const { upload, fileStat } = uploadFunction({ drive });
     await Promise.mapSeries(files, async (f, idx) => {
       const { fileSizeH } = await fileStat(f);
-      const sizeTxt = _.padStart(colors.green(`[${fileSizeH}]`), 23, ' ');
+      let sizeTxt = _.padStart(colors.green(`${fileSizeH}`), 23, ' ');
+      sizeTxt = colors.green(`[${sizeTxt}]`);
       console.log(` ${idx + 1}/${files.length}) ${sizeTxt} ${f}`);
       return Promise.resolve();
     });
