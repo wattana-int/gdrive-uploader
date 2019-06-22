@@ -6,6 +6,7 @@ services:
       - ../app:/app
       - /Users/wattana/Downloads:/downloads:ro
       - data:/data
+    command: sleep infinity
 volumes: 
   app_node_module: {}
   data: {}

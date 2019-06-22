@@ -56,7 +56,6 @@ self = ->
     oauth2Client,
     drive,
     generateUrl: ->
-      console.log colors.bold.green " >> Generate Login url"
       console.log oauth2Client.generateAuthUrl {
         access_type: 'offline',
         scope
