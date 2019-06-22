@@ -15,34 +15,18 @@ const SCOPES = [
 ];
 
 const buildClient = async () => {
-  let clientId;
-  let clientSecret;
-  let redirectUris;
-  if (_(process.env).get('CLIENT_ID')) {
-    clientId = _(process.env).get('CLIENT_ID');
-  }
-  if (_(process.env).get('CLIENT_SECRET')) {
-    clientSecret = _(process.env).get('CLIENT_SECRET');
+  const clientFileExists = await fsx.exists(CLIENT_JSON_FILE);
+  if (!clientFileExists) {
+    console.log(colors.bold.red(`${CLIENT_JSON_FILE} not found.`));
+    process.exit(127);
   }
 
-  if (!_(clientId).isString() || !_(clientSecret).isString()) {
-    const clientFileExists = await fsx.exists(CLIENT_JSON_FILE);
-    if (!clientFileExists) {
-      console.log(colors.bold.red(`${CLIENT_JSON_FILE} not found.`));
-      process.exit(127);
-    }
-
-    const { installed } = await fsx.readJSON(CLIENT_JSON_FILE);
-    const {
-      client_id: ClientId,
-      client_secret: ClientSecret,
-      redirect_uris: RedirectUris,
-    } = installed;
-
-    clientId = ClientId;
-    clientSecret = ClientSecret;
-    redirectUris = RedirectUris;
-  }
+  const { installed } = await fsx.readJSON(CLIENT_JSON_FILE);
+  const {
+    client_id: clientId,
+    client_secret: clientSecret,
+    redirect_uris: redirectUris,
+  } = installed;
 
   const oauth2Client = new google.auth.OAuth2(
     clientId,

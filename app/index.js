@@ -1,3 +1,4 @@
+#!/usr/local/bin/node
 /* eslint-disable no-console */
 const _ = require('lodash');
 const colors = require('colors');
