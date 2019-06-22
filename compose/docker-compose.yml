@@ -4,5 +4,5 @@ services:
     build:
       context: ../app
       dockerfile: ../Dockerfile
-    image: wattania/gdrive-uploader
+    image: asia.gcr.io/gold-stone-241212/gdrive-uploader
 
