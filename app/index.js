@@ -12,6 +12,18 @@ const authFunction = require('./libs/auth');
 const uploadFunction = require('./libs/upload');
 
 program
+  .command('link <id>')
+  .action(async (id) => {
+    const { oauth2Client } = await authFunction();
+    // const token = await oauth2Client.getRequestHeaders();
+    // const a = await oauth2Client.refreshAccessToken();
+    const { token } = await oauth2Client.getAccessToken();
+    const baseUrl = `https://www.googleapis.com/drive/v3/files/${id}?alt=media&access_token=${token}`;
+    console.log(baseUrl);
+    // console.log(a);
+  });
+
+program
   .command('auth')
   .option('--info', 'Show Info')
   .action(async ({ info }) => {

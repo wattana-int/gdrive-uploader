@@ -50,6 +50,8 @@ const buildClient = async () => {
   oauth2Client.on('tokens', (tokens) => {
     if (tokens.refresh_token) {
       console.log('--- token expired, renew from refresh token ---');
+    } else {
+      console.log('-a-', tokens);
     }
   });
 
@@ -86,7 +88,7 @@ module.exports = async () => {
         return console.log(colors.bold('Token file not found!'));
       }
 
-      const { expiry_date: expiryDate } = await fsx.readJSON(TOKEN_PATH);
+      const { access_token: accessToken, expiry_date: expiryDate } = await fsx.readJSON(TOKEN_PATH);
 
       const ret = {
         'File path': TOKEN_PATH,
@@ -106,8 +108,13 @@ module.exports = async () => {
         fields: 'user(displayName,emailAddress,me)',
       });
       console.log(data);
-      return console.log(colors.bold('________________________________________________________'));
+      console.log(colors.bold('________________________________________________________'));
+      console.log('AccessToken:');
+      console.log(accessToken);
+      console.log();
     },
   };
-  return _.extend(self, { clientId, clientSecret, drive });
+  return _.extend(self, {
+    clientId, clientSecret, drive, oauth2Client,
+  });
 };
