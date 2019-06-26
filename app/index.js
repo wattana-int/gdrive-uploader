@@ -18,7 +18,9 @@ program
     const { oauth2Client } = await authFunction();
 
     const test = id.match(/^.*id=(\S*)$/);
-    if (test[1]) [, fileId] = test;
+    if (test) {
+      if (test[1]) [, fileId] = test;
+    }
 
     const { token } = await oauth2Client.getAccessToken();
     const baseUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&access_token=${token}`;
