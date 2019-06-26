@@ -50,8 +50,6 @@ const buildClient = async () => {
   oauth2Client.on('tokens', (tokens) => {
     if (tokens.refresh_token) {
       console.log('--- token expired, renew from refresh token ---');
-    } else {
-      console.log('-a-', tokens);
     }
   });
 

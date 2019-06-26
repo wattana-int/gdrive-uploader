@@ -14,13 +14,17 @@ const uploadFunction = require('./libs/upload');
 program
   .command('link <id>')
   .action(async (id) => {
+    let fileId = id;
     const { oauth2Client } = await authFunction();
-    // const token = await oauth2Client.getRequestHeaders();
-    // const a = await oauth2Client.refreshAccessToken();
+
+    const test = id.match(/^.*id=(\S*)$/);
+    if (test[1]) [, fileId] = test;
+
     const { token } = await oauth2Client.getAccessToken();
-    const baseUrl = `https://www.googleapis.com/drive/v3/files/${id}?alt=media&access_token=${token}`;
+    const baseUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&access_token=${token}`;
+    console.log('---');
     console.log(baseUrl);
-    // console.log(a);
+    console.log('');
   });
 
 program
