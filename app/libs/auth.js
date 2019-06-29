@@ -109,7 +109,7 @@ module.exports = async () => {
       console.log(colors.bold('________________________________________________________'));
       console.log('AccessToken:');
       console.log(accessToken);
-      console.log();
+      return console.log();
     },
   };
   return _.extend(self, {
