@@ -21,7 +21,7 @@
     "humanize": "0.0.9",
     "inquirer": "^6.2.2",
     "js-yaml": "^3.13.1",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "mime-types": "^2.1.22",
     "moment": "^2.24.0",
     "progress": "^2.0.3",
