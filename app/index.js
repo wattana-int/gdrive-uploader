@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const colors = require('colors');
 const fg = require('fast-glob');
-const path = require('path');
 const program = require('commander');
 const prompts = require('prompts');
 const Promise = require('bluebird');
@@ -55,8 +54,8 @@ program
   .action(async (aGlob) => {
     const { drive } = await authFunction();
 
-    let glob = path.join(process.cwd(), '**/*');
-    if (aGlob) glob = path.join(process.cwd(), aGlob);
+    let glob = '**/*';
+    if (_.isString(aGlob)) glob = aGlob;
 
     console.log(colors.green(`GLOB: ${glob}`));
 
