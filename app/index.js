@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const colors = require('colors');
 const fg = require('fast-glob');
+const path = require('path');
 const program = require('commander');
 const prompts = require('prompts');
 const Promise = require('bluebird');
@@ -60,7 +61,11 @@ program
     console.log(colors.green(`GLOB: ${glob}`));
 
     const files = await fg(glob);
+    console.log('-1-');
 
+    // console.log(files.map(f => (path.join(process.cwd(), f))))
+    const fileFullPath = files.map(f => (path.resolve(f)));
+    console.log(fileFullPath)
     if (_(files).isEmpty() || !_(files).isArray()) {
       console.log(colors.bold.yellow('Found 0 files'));
       process.exit(127);
@@ -92,7 +97,7 @@ program
       process.exit(1);
     }
 
-    await upload(files);
+    await upload(fileFullPath);
   });
 
 program.parse(process.argv);
